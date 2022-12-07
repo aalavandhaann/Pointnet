@@ -9,7 +9,9 @@ Otherwise  you will have the internal libdevice error
 """
 import os
 import pathlib
+import datetime
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 import keras
 import tensorflow as tf
 
@@ -30,8 +32,8 @@ if __name__ == '__main__':
 
     """ Create the tensor slices of the loaded dataset (for both training and testing) """
     print('CREATEING THE TENSOR SLICES FOR THE TRAINING AND TESTING DATASET')
-    train_dataset = tf.data.Dataset.from_tensor_slices((train_points, train_labels.T))
-    test_dataset = tf.data.Dataset.from_tensor_slices((test_points, test_labels.T))
+    train_dataset = tf.data.Dataset.from_tensor_slices((train_points, train_labels))
+    test_dataset = tf.data.Dataset.from_tensor_slices((test_points, test_labels))
 
     """ Apply shuffling and agumentation to the training dataset """
     print('APPLYING THE AUGMENTATION FOR THE TRAINING AND TESTING DATASETS')
@@ -50,19 +52,19 @@ if __name__ == '__main__':
     print('COMPILE THE POINTNET MODEL')
     model.compile(
                 loss="sparse_categorical_crossentropy", 
-                run_eagerly=True, 
                 optimizer=tf.keras.optimizers.Adam(constants.LEARNING_RATE), 
                 metrics=["sparse_categorical_accuracy"])
             
-    
+    log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
     print('REGISTERING ALL THE CALLBACKS ')
     callbacks = [
         tf.keras.callbacks.ModelCheckpoint(filepath=f"{checkpoint_path}", verbose=1, save_weights_only=False, save_freq=10*constants.BATCH_SIZE),
-        tf.keras.callbacks.TensorBoard(),
+        tensorboard_callback,
         # tf.keras.callbacks.EarlyStopping(monitor='loss', patience=20, restore_best_weights=False)
     ]
     print('REGISTERED ALL THE CALLBACKS ')
 
     print('TRAINING STARTS ......')
-    model.fit(train_dataset, epochs=20, validation_data=test_dataset, callbacks=callbacks)
+    model.fit(train_dataset, epochs=30, validation_data=test_dataset, callbacks=callbacks)
     print('TRAINING ENDED......')

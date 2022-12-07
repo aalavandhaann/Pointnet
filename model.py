@@ -20,8 +20,8 @@ def transformerNet(inputs:keras.engine.keras_tensor.KerasTensor, num_features:in
     reg:OrthogonalRegularizer = OrthogonalRegularizer(num_features)
 
     x = convolutionBatchNormalization(inputs, 32)
-    x = convolutionBatchNormalization(inputs, 64)
-    x = convolutionBatchNormalization(inputs, 512)
+    x = convolutionBatchNormalization(x, 64)
+    x = convolutionBatchNormalization(x, 512)
     x = tf.keras.layers.GlobalMaxPool1D()(x)
     x = denseBatchNormalization(x, 256)
     x = denseBatchNormalization(x, 128)

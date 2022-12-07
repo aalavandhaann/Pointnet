@@ -35,7 +35,7 @@ def augmentation(points3d:np.ndarray, label:str) -> tuple:
 
 def processDataset(datasetpath:pathlib.Path = pathlib.Path('./ModelNet10'), sampling:int = constants.UNIFORM_SAMPLE_COUNT) -> tuple:
     mat_path:pathlib.Path = pathlib.Path(os.path.join(datasetpath, 'dataset.mat'))
-
+    
     if(not mat_path.exists()):
         if(not datasetpath.exists()):
             loadModelNet10(datasetpath)
@@ -44,8 +44,8 @@ def processDataset(datasetpath:pathlib.Path = pathlib.Path('./ModelNet10'), samp
         train_labels:list = []
         test_points:list = []
         test_labels:list = []
-        class_map:object = {}
-        directories = list(datasetpath.glob("[!README]*"))
+        class_map:object = ['None']
+        directories = [d for d in list(datasetpath.glob("*")) if d.is_dir()]
         main_progress:tqdm.tqdm = tqdm.tqdm(enumerate(directories), desc="Parse Class: ", leave=False, total=len(directories))
         for classLabelIndex, directory in main_progress:
 
@@ -56,6 +56,7 @@ def processDataset(datasetpath:pathlib.Path = pathlib.Path('./ModelNet10'), samp
             test_data_progress:tqdm.tqdm = tqdm.tqdm(enumerate(testing_files), desc="Testing Data: ", total=len(testing_files), leave=False)
         
             main_progress.set_description(f'Parse class: {directory.stem}', refresh=True)
+            class_map.append(directory.name.strip())
 
             for _, train_file in train_data_progress:
                 train_data_progress.set_description(f'Class: {directory.stem}, Training File: {train_file.stem}', refresh=True)
@@ -65,8 +66,6 @@ def processDataset(datasetpath:pathlib.Path = pathlib.Path('./ModelNet10'), samp
             train_data_progress.set_description(f'Class: {directory.stem}, Total Training Files: {len(training_files)}', refresh=True)
             train_data_progress.update()
             main_progress.set_description(f'Parse class: {directory.stem}', refresh=True)
-
-            class_map[classLabelIndex] = directory.stem
 
             for _, test_file in test_data_progress:
                 test_data_progress.set_description(f'Class: {directory.stem}, Testing File: {test_file.stem}', refresh=True)
@@ -83,16 +82,18 @@ def processDataset(datasetpath:pathlib.Path = pathlib.Path('./ModelNet10'), samp
                     'test_points': np.array(test_points), 
                     'train_labels': np.array(train_labels), 
                     'test_labels': np.array(test_labels), 
-                    'class_map': class_map}
+                    'class_map': np.array(class_map, dtype=str)}
                     
         sio.savemat(mat_path, sio_data)
     
     mat_data = sio.loadmat(mat_path)
     train_points = mat_data['train_points']
     test_points = mat_data['test_points']
-    train_labels = mat_data['train_labels']
-    test_labels = mat_data['test_labels']
-    class_map = mat_data['class_map']
+    train_labels = mat_data['train_labels'].flatten()
+    test_labels = mat_data['test_labels'].flatten()
+    temp_class_map = mat_data['class_map']
+    class_map = {i:label.strip() for i, label in enumerate(temp_class_map[1:])}
+
     return (np.array(train_points), np.array(test_points), np.array(train_labels), np.array(test_labels), class_map)
 
 def meshVisualization(meshpath:pathlib.Path) -> None: 
@@ -133,4 +134,5 @@ if __name__ == '__main__':
     print(test_points.shape)
     print(train_labels.shape)
     print(test_labels.shape)
+    print(train_labels)
     print(class_map)
