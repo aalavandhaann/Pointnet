@@ -1,4 +1,4 @@
-RANDOM_SEED:int = 42
+RANDOM_SEED:int = 1234
 UNIFORM_SAMPLE_COUNT = 2048
 NUM_CLASSES = 10
 """ Hyperparameters """

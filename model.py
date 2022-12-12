@@ -5,18 +5,18 @@ import tensorflow as tf
 import constants
 
 def convolutionBatchNormalization(layer:keras.engine.keras_tensor.KerasTensor, filters:int)-> keras.engine.keras_tensor.KerasTensor:
-    layer = keras.layers.Conv1D(filters, kernel_size=1, padding="valid")(layer)
-    layer = keras.layers.BatchNormalization(momentum=0.0)(layer)
-    return keras.layers.Activation('relu')(layer)
+    layer = tf.keras.layers.Conv1D(filters, kernel_size=1, padding="valid")(layer)
+    layer = tf.keras.layers.BatchNormalization(momentum=0.0)(layer)
+    return tf.keras.layers.Activation('relu')(layer)
 
 def denseBatchNormalization(layer:keras.engine.keras_tensor.KerasTensor, filters:int)->keras.engine.keras_tensor.KerasTensor:
-    layer = keras.layers.Dense(filters)(layer)
-    layer = keras.layers.BatchNormalization(momentum=0.0)(layer)
-    return keras.layers.Activation('relu')(layer)
+    layer = tf.keras.layers.Dense(filters)(layer)
+    layer = tf.keras.layers.BatchNormalization(momentum=0.0)(layer)
+    return tf.keras.layers.Activation('relu')(layer)
 
 def transformerNet(inputs:keras.engine.keras_tensor.KerasTensor, num_features:int) -> keras.engine.keras_tensor.KerasTensor:
     # Create the initial set of bias weights
-    bias:keras.initializers.Constant = keras.initializers.Constant(np.eye(num_features).flatten())
+    bias:tf.keras.initializers.Constant = tf.keras.initializers.Constant(np.eye(num_features).flatten())
     reg:OrthogonalRegularizer = OrthogonalRegularizer(num_features)
 
     x = convolutionBatchNormalization(inputs, 32)

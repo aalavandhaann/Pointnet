@@ -15,6 +15,8 @@ import model
 
 
 if __name__ == '__main__':
+    tf.random.set_seed(constants.RANDOM_SEED)
+    
     DATASET_SAVED_PATH:pathlib.Path = pathlib.Path(os.path.join(pathlib.Path(__file__).parents[0], 'ModelNet10'))
 
     """ Load the pointcloud dataset """
