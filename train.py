@@ -11,7 +11,7 @@ import os
 import pathlib
 import datetime
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
-os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
+# os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 import keras
 import tensorflow as tf
 
@@ -19,8 +19,12 @@ import constants
 import datasetloader
 import model
 
-
+'''
+Expect the val_loss to be too high during the training. This is owing to the fact that 
+the input data is not normalized, i.e point clouds are not normalized. 
+'''
 if __name__ == '__main__':
+    tf.random.set_seed(constants.RANDOM_SEED)
     DATASET_SAVED_PATH:pathlib.Path = pathlib.Path(os.path.join(pathlib.Path(__file__).parents[0], 'ModelNet10'))
     checkpoint_path:pathlib.Path = pathlib.Path('./trained_model/checkpoints/cp-{epoch:04d}.ckpt')
     checkpoint_path.parents[0].mkdir(parents=True, exist_ok=True)
@@ -59,12 +63,12 @@ if __name__ == '__main__':
     tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
     print('REGISTERING ALL THE CALLBACKS ')
     callbacks = [
-        tf.keras.callbacks.ModelCheckpoint(filepath=f"{checkpoint_path}", verbose=1, save_weights_only=False, save_freq=10*constants.BATCH_SIZE),
+        tf.keras.callbacks.ModelCheckpoint(filepath=f"{checkpoint_path}", verbose=1, save_weights_only=True, save_freq=10*constants.BATCH_SIZE),
         tensorboard_callback,
         # tf.keras.callbacks.EarlyStopping(monitor='loss', patience=20, restore_best_weights=False)
     ]
     print('REGISTERED ALL THE CALLBACKS ')
 
     print('TRAINING STARTS ......')
-    model.fit(train_dataset, epochs=30, validation_data=test_dataset, callbacks=callbacks)
+    model.fit(train_dataset, epochs=constants.EPOCHS, validation_data=test_dataset, callbacks=callbacks)
     print('TRAINING ENDED......')
