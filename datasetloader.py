@@ -44,7 +44,7 @@ def processDataset(datasetpath:pathlib.Path = pathlib.Path('./ModelNet10'), samp
         train_labels:list = []
         test_points:list = []
         test_labels:list = []
-        class_map:object = ['None']
+        class_map:list = []
         directories = [d for d in list(datasetpath.glob("*")) if d.is_dir()]
         main_progress:tqdm.tqdm = tqdm.tqdm(enumerate(directories), desc="Parse Class: ", leave=False, total=len(directories))
         for classLabelIndex, directory in main_progress:
@@ -92,7 +92,7 @@ def processDataset(datasetpath:pathlib.Path = pathlib.Path('./ModelNet10'), samp
     train_labels = mat_data['train_labels'].flatten()
     test_labels = mat_data['test_labels'].flatten()
     temp_class_map = mat_data['class_map']
-    class_map = {i:label.strip() for i, label in enumerate(temp_class_map[1:])}
+    class_map = {i:label.strip() for i, label in enumerate(temp_class_map)}
 
     return (np.array(train_points), np.array(test_points), np.array(train_labels), np.array(test_labels), class_map)
 
